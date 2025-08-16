@@ -2,8 +2,10 @@ package com.security.service.impl;
 
 import com.security.dto.ProfileRequest;
 import com.security.dto.ProfileResponse;
+import com.security.entity.Role;
 import com.security.entity.User;
 import com.security.exception.UserException;
+import com.security.repository.RoleRepository;
 import com.security.repository.UserRepository;
 import com.security.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -26,19 +30,35 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Override
     public ProfileResponse createUser(ProfileRequest profileRequest) {
-        if (!userRepository.existsByEmail(profileRequest.getEmail())) {
-            User newProfile = modelMapper.map(profileRequest, User.class);
-            newProfile.setUserId(UUID.randomUUID().toString()); // ✅ Assign random userId
-            newProfile.setPassword(passwordEncoder.encode(profileRequest.getPassword())); // ✅ Encrypt password
-            newProfile = userRepository.save(newProfile);
-            return modelMapper.map(newProfile, ProfileResponse.class); // ✅ Return DTO
+
+        // 1️⃣ Email check
+        if (userRepository.existsByEmail(profileRequest.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
 
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+        // 2️⃣ Prepare roles
+        Set<Role> roles = new HashSet<>();
+//        if (profileRequest.getRoleEntities() == null || profileRequest.getRoleEntities().isEmpty()) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one role must be assigned");
+//        }
+
+
+        // 3️⃣ Map DTO to entity
+        User newUser = modelMapper.map(profileRequest, User.class);
+        newUser.setUserId(UUID.randomUUID().toString());
+        newUser.setPassword(passwordEncoder.encode(profileRequest.getPassword()));
+        newUser.setRoleEntities(profileRequest.getRoleEntities());
+
+        // 4️⃣ Save & return
+        User savedUser = userRepository.save(newUser);
+        return modelMapper.map(savedUser, ProfileResponse.class);
     }
+
+
 
 
     @Override

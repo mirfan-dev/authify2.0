@@ -33,11 +33,13 @@ spring:
           ssl:
             trust: "*"
 
-
-
-
-
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
 
 jwt:
   secret:
     key: YbP1VzUqa7uD6SNXvh7Umm7RIMRqlRSdPGph5YBtzgc=
+
+
+## swagger test url : http://localhost:9091/api/v1/swagger-ui/index.html

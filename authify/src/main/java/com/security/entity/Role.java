@@ -1,5 +1,7 @@
 package com.security.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,5 +26,6 @@ public class Role {
     private  String name;
 
     @ManyToMany(mappedBy = "roleEntities")
+    @JsonIgnore
     private List<User> users=new ArrayList<>();
 }

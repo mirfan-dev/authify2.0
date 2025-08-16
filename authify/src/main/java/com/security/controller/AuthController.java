@@ -8,6 +8,7 @@ import com.security.dto.ResetPasswordRequest;
 import com.security.service.AuthService;
 import com.security.service.UserService;
 import com.security.service.impl.AppUserDetailsService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Public APIs")
 public class AuthController {
 
     private final AuthService authService;

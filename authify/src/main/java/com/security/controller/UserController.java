@@ -6,6 +6,7 @@ import com.security.dto.ProfileResponse;
 import com.security.entity.User;
 import com.security.service.UserService;
 import com.security.service.impl.EmailService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,8 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "User APIs")
 public class UserController {
 
     private final UserService userService;
@@ -33,6 +35,7 @@ public class UserController {
         emailService.sendEmail(request.getEmail(), request.getName());
         return userService.createUser(request);
     }
+
 
     @GetMapping("/profile")
     public ProfileResponse getProfile(@CurrentSecurityContext(expression = "authentication?.name") String email){
@@ -60,9 +63,11 @@ public class UserController {
 
         userService.deleteUser(userId);
         APIResponse response=new APIResponse();
+        response.setMessage("User Deleted Successfully");
         return new ResponseEntity<>(response,HttpStatus.ACCEPTED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/pagination")
     public ResponseEntity<Page<ProfileResponse>> getEmployeeWithPagination(
             @RequestParam(value = "pageNumber", defaultValue = "0") int page,
@@ -78,7 +83,7 @@ public class UserController {
 
         return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/search/{keyword}")
     public ResponseEntity<List<ProfileResponse>> searchEmployee(@PathVariable String keyword) {
         List<ProfileResponse> userDtos = userService.searchUsers(keyword);
